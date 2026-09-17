@@ -1,0 +1,19 @@
+{
+  "name": "community-cart",
+  "version": "0.1.0",
+  "description": "CommunityCart - A Unified Rural Community Platform (MERN)",
+  "private": true,
+  "scripts": {
+    "start": "node server/server.js",
+    "server": "node --watch server/server.js",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "npm run build --prefix client",
+    "install-all": "npm install && npm install --prefix server && npm install --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "author": "CommunityCart Team",
+  "license": "MIT"
+}
