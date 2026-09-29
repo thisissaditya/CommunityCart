@@ -23,7 +23,7 @@ export const HeroSection = () => {
     },
     {
       id: 'grocery',
-      title: 'Village Kirana & Produce',
+      title: 'Purshottam Rakesh',
       sub: 'Atta, milk, spices & veggies',
       icon: <ShoppingBasket size={24} color="#059669" />,
       bgColor: '#ECFDF5',

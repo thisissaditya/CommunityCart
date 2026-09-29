@@ -10,7 +10,7 @@ export const fetchStores = async (category = 'all', village = '') => {
     const res = await fetch(`${API_BASE}/stores?${params.toString()}`);
     if (!res.ok) throw new Error('Network response not ok');
     const data = await res.json();
-    return data.stores || [];
+    return (data.stores || []).map(store => ({ ...store, id: store._id || store.id }));
   } catch (err) {
     console.warn('Backend API fallback for stores:', err);
     return [];
@@ -26,7 +26,7 @@ export const fetchProducts = async (category = 'all', search = '') => {
     const res = await fetch(`${API_BASE}/stores/products?${params.toString()}`);
     if (!res.ok) throw new Error('Network response not ok');
     const data = await res.json();
-    return data.products || [];
+    return (data.products || []).map(product => ({ ...product, id: product._id || product.id }));
   } catch (err) {
     console.warn('Backend API fallback for products:', err);
     return [];

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { X, Plus, Minus, ShoppingBag, ArrowRight, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { PrescriptionUpload } from './PrescriptionUpload';
 
 export const CartDrawer = () => {
   const { 
@@ -16,6 +17,10 @@ export const CartDrawer = () => {
 
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [customerAddress, setCustomerAddress] = useState('Near Primary School, Ward No. 3');
+  const [prescriptionUrl, setPrescriptionUrl] = useState(null);
+
+  // Check if cart has pharmacy items
+  const hasPharmacyItems = cart.some(item => item.category === 'pharmacy');
 
   if (!isCartOpen) return null;
 
@@ -24,11 +29,17 @@ export const CartDrawer = () => {
   const totalPayable = cartSubtotal > 0 ? cartSubtotal + deliveryFee + platformCommunityFee : 0;
 
   const handlePlaceOrder = () => {
+    if (hasPharmacyItems && !prescriptionUrl) {
+      showToast('Please upload a valid prescription for pharmacy items', 'error');
+      return;
+    }
+    
     setOrderPlaced(true);
     setTimeout(() => {
       clearCart();
       setOrderPlaced(false);
       setIsCartOpen(false);
+      setPrescriptionUrl(null);
       showToast('🎉 Order placed successfully! Local vendor will dispatch shortly.');
     }, 2000);
   };
@@ -158,6 +169,10 @@ export const CartDrawer = () => {
                 <ShieldCheck size={16} color="var(--emerald-600)" />
                 <span>Pay on Delivery (Cash / UPI on handover). No advance payment needed.</span>
               </div>
+              
+              {hasPharmacyItems && (
+                <PrescriptionUpload onUploadSuccess={(url) => setPrescriptionUrl(url)} />
+              )}
             </div>
 
             <div className="cart-footer">

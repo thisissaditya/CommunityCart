@@ -8,6 +8,7 @@ import storeRoutes from './routes/storeRoutes.js';
 import complaintRoutes from './routes/complaintRoutes.js';
 import emergencyRoutes from './routes/emergencyRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use('/api/stores', storeRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/emergency', emergencyRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // System Health & Status Check
 app.get('/api/health', (req, res) => {

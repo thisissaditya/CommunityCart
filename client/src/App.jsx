@@ -96,7 +96,7 @@ const MainContent = () => {
                   className={`filter-pill ${selectedCategory === 'grocery' ? 'active' : ''}`}
                   onClick={() => setSelectedCategory('grocery')}
                 >
-                  <ShoppingBasket size={14} /> Village Kirana & Produce
+                  <ShoppingBasket size={14} /> Aditya
                 </button>
                 <button
                   className={`filter-pill ${selectedCategory === 'pharmacy' ? 'active' : ''}`}

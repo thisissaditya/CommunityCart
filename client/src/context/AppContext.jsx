@@ -28,8 +28,16 @@ export const AppProvider = ({ children }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Cart state
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    const savedCart = localStorage.getItem('communitycart_cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Sync cart to localStorage
+  useEffect(() => {
+    localStorage.setItem('communitycart_cart', JSON.stringify(cart));
+  }, [cart]);
 
   // Modals
   const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
