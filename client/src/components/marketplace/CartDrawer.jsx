@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { X, Plus, Minus, ShoppingBag, ArrowRight, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, ArrowRight, CheckCircle2, ShieldCheck, Phone, MapPin, Truck } from 'lucide-react';
 import { PrescriptionUpload } from './PrescriptionUpload';
+import { createOrderApi } from '../../services/api';
 
 export const CartDrawer = () => {
   const { 
@@ -12,12 +13,20 @@ export const CartDrawer = () => {
     clearCart, 
     cartSubtotal, 
     selectedVillage,
-    showToast 
+    currentUser,
+    showToast,
+    triggerSmsAlert,
+    refreshOrders,
+    setActiveTab
   } = useApp();
 
-  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [orderPlacedData, setOrderPlacedData] = useState(null);
   const [customerAddress, setCustomerAddress] = useState('Near Primary School, Ward No. 3');
+  const [customerPhone, setCustomerPhone] = useState(currentUser?.phone || '+91 98765 43210');
+  const [customerName, setCustomerName] = useState(currentUser?.name || 'Aditya Rakesh');
+  const [paymentMethod, setPaymentMethod] = useState('Cash on Delivery');
   const [prescriptionUrl, setPrescriptionUrl] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Check if cart has pharmacy items
   const hasPharmacyItems = cart.some(item => item.category === 'pharmacy');
@@ -28,20 +37,77 @@ export const CartDrawer = () => {
   const platformCommunityFee = 2; // Nominal rural server maintenance
   const totalPayable = cartSubtotal > 0 ? cartSubtotal + deliveryFee + platformCommunityFee : 0;
 
-  const handlePlaceOrder = () => {
+  // Determine primary store from items in cart
+  const primaryStoreName = cart.length > 0 ? cart[0].storeName : 'Village Local Store';
+  const primaryStoreId = cart.length > 0 ? (cart[0].storeId || 'store-1') : 'store-1';
+
+  const handlePlaceOrder = async () => {
+    if (cart.length === 0) return;
+
     if (hasPharmacyItems && !prescriptionUrl) {
       showToast('Please upload a valid prescription for pharmacy items', 'error');
       return;
     }
-    
-    setOrderPlaced(true);
-    setTimeout(() => {
+
+    if (!customerAddress.trim()) {
+      showToast('Please specify your village delivery landmark or house', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const orderPayload = {
+      customer: {
+        name: customerName,
+        phone: customerPhone,
+        email: currentUser?.email || 'aditya@example.com',
+        address: customerAddress,
+        village: selectedVillage,
+      },
+      storeId: primaryStoreId,
+      storeName: primaryStoreName,
+      items: cart.map(it => ({
+        productId: it.id,
+        name: it.name,
+        price: it.price,
+        quantity: it.quantity,
+        unit: it.unit || '1 item',
+        category: it.category || 'food',
+        isVeg: it.isVeg !== false,
+        image: it.image,
+      })),
+      subtotal: cartSubtotal,
+      deliveryFee,
+      platformFee: platformCommunityFee,
+      totalAmount: totalPayable,
+      paymentMethod,
+      prescriptionUrl,
+    };
+
+    const res = await createOrderApi(orderPayload);
+    setIsSubmitting(false);
+
+    if (res.success && res.order) {
+      setOrderPlacedData(res.order);
       clearCart();
-      setOrderPlaced(false);
-      setIsCartOpen(false);
-      setPrescriptionUrl(null);
-      showToast('🎉 Order placed successfully! Local vendor will dispatch shortly.');
-    }, 2000);
+      refreshOrders();
+      showToast('🎉 Order placed successfully! Local shopkeeper alerted.');
+
+      // Dispatch Rural SMS simulation
+      triggerSmsAlert({
+        phone: customerPhone,
+        title: 'Order Dispatched Alert',
+        message: `Your order #${res.order.orderNumber} from ${primaryStoreName} has been received! Total: ₹${totalPayable} (${paymentMethod}). Shopkeeper is packing now.`,
+      });
+    } else {
+      showToast(res.message || 'Failed to place order. Please try again.', 'error');
+    }
+  };
+
+  const handleTrackOrder = () => {
+    setOrderPlacedData(null);
+    setIsCartOpen(false);
+    setActiveTab('orders');
   };
 
   return (
@@ -55,13 +121,16 @@ export const CartDrawer = () => {
           <button 
             className="modal-close-btn" 
             style={{ position: 'static' }}
-            onClick={() => setIsCartOpen(false)}
+            onClick={() => {
+              setOrderPlacedData(null);
+              setIsCartOpen(false);
+            }}
           >
             <X size={16} />
           </button>
         </div>
 
-        {orderPlaced ? (
+        {orderPlacedData ? (
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -72,8 +141,8 @@ export const CartDrawer = () => {
             textAlign: 'center'
           }}>
             <div style={{
-              width: '64px',
-              height: '64px',
+              width: '70px',
+              height: '70px',
               borderRadius: '50%',
               background: 'var(--emerald-100)',
               display: 'flex',
@@ -82,12 +151,71 @@ export const CartDrawer = () => {
               marginBottom: '1rem',
               color: 'var(--emerald-600)'
             }}>
-              <CheckCircle2 size={36} />
+              <CheckCircle2 size={40} />
             </div>
-            <h3 style={{ fontSize: '1.3rem', marginBottom: '0.5rem' }}>Order Confirmed!</h3>
-            <p style={{ color: 'var(--slate-500)', fontSize: '0.9rem' }}>
-              Your order is sent to the local shopkeeper. Pay cash upon delivery to your doorstep.
+
+            <span style={{
+              background: 'var(--emerald-50)',
+              color: 'var(--emerald-700)',
+              padding: '0.25rem 0.75rem',
+              borderRadius: '20px',
+              fontSize: '0.8rem',
+              fontWeight: 800,
+              letterSpacing: '0.04em',
+              marginBottom: '0.75rem'
+            }}>
+              {orderPlacedData.orderNumber}
+            </span>
+
+            <h3 style={{ fontSize: '1.35rem', marginBottom: '0.5rem' }}>Order Placed with {orderPlacedData.storeName}!</h3>
+            <p style={{ color: 'var(--slate-600)', fontSize: '0.875rem', lineHeight: 1.5, marginBottom: '1.5rem', maxWidth: '320px' }}>
+              Your order is sent to the local vendor. An SMS notification has been dispatched to <strong>{orderPlacedData.customer?.phone}</strong>.
             </p>
+
+            <div style={{
+              width: '100%',
+              background: 'var(--slate-50)',
+              borderRadius: 'var(--radius-md)',
+              padding: '1rem',
+              border: '1px solid var(--slate-200)',
+              marginBottom: '1.5rem',
+              textAlign: 'left',
+              fontSize: '0.84rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                <span style={{ color: 'var(--slate-500)' }}>Total Payable:</span>
+                <span style={{ fontWeight: 800, color: 'var(--slate-900)' }}>₹{orderPlacedData.totalAmount} ({orderPlacedData.paymentMethod})</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                <span style={{ color: 'var(--slate-500)' }}>Village:</span>
+                <span style={{ fontWeight: 600 }}>{orderPlacedData.customer?.village}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--slate-500)' }}>Handover Landmark:</span>
+                <span style={{ fontWeight: 600 }}>{orderPlacedData.customer?.address}</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', width: '100%' }}>
+              <button 
+                className="btn-primary" 
+                style={{ width: '100%', justifyContent: 'center' }}
+                onClick={handleTrackOrder}
+              >
+                <Truck size={17} />
+                <span>Track Live Order Status</span>
+              </button>
+              <button 
+                className="btn-secondary" 
+                style={{ width: '100%', justifyContent: 'center' }}
+                onClick={() => {
+                  setOrderPlacedData(null);
+                  setIsCartOpen(false);
+                }}
+              >
+                Continue Browsing
+              </button>
+            </div>
           </div>
         ) : cart.length === 0 ? (
           <div style={{
@@ -102,7 +230,7 @@ export const CartDrawer = () => {
             <ShoppingBag size={48} color="var(--slate-300)" style={{ marginBottom: '1rem' }} />
             <h4 style={{ color: 'var(--slate-700)', marginBottom: '0.4rem' }}>Your cart is empty</h4>
             <p style={{ color: 'var(--slate-400)', fontSize: '0.85rem' }}>
-              Add wholesome mess meals, groceries or health medicines to start ordering.
+              Add authentic dhaba meals, groceries or health medicines to start ordering.
             </p>
           </div>
         ) : (
@@ -136,38 +264,127 @@ export const CartDrawer = () => {
                 </div>
               ))}
 
-              {/* Delivery Destination Input */}
+              {/* Delivery Destination & Contact Details */}
               <div style={{
                 background: 'var(--slate-50)',
                 padding: '1rem',
                 borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--slate-200)',
-                marginTop: '1rem'
+                marginTop: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem'
               }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--slate-500)', textTransform: 'uppercase', marginBottom: '0.3rem' }}>
-                  Delivery Village & Landmark
+                <div>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--slate-500)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
+                    Delivery Village & Service Area
+                  </div>
+                  <div style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--slate-800)' }}>
+                    📍 {selectedVillage}
+                  </div>
                 </div>
-                <div style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--slate-800)', marginBottom: '0.4rem' }}>
-                  📍 {selectedVillage}
+
+                <div>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--slate-600)', display: 'block', marginBottom: '0.25rem' }}>
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="Enter your name"
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem 0.75rem',
+                      borderRadius: 'var(--radius-xs)',
+                      border: '1px solid var(--slate-300)',
+                      fontSize: '0.85rem'
+                    }}
+                  />
                 </div>
-                <input
-                  type="text"
-                  value={customerAddress}
-                  onChange={(e) => setCustomerAddress(e.target.value)}
-                  placeholder="House number, landmark, pole no."
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: 'var(--radius-xs)',
-                    border: '1px solid var(--slate-300)',
-                    fontSize: '0.85rem'
-                  }}
-                />
+
+                <div>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--slate-600)', display: 'block', marginBottom: '0.25rem' }}>
+                    Mobile Number (For Village SMS Alerts)
+                  </label>
+                  <input
+                    type="text"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="+91 98765 43210"
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem 0.75rem',
+                      borderRadius: 'var(--radius-xs)',
+                      border: '1px solid var(--slate-300)',
+                      fontSize: '0.85rem'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--slate-600)', display: 'block', marginBottom: '0.25rem' }}>
+                    Delivery Address / Landmark
+                  </label>
+                  <input
+                    type="text"
+                    value={customerAddress}
+                    onChange={(e) => setCustomerAddress(e.target.value)}
+                    placeholder="House number, landmark, pole no."
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem 0.75rem',
+                      borderRadius: 'var(--radius-xs)',
+                      border: '1px solid var(--slate-300)',
+                      fontSize: '0.85rem'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--slate-600)', display: 'block', marginBottom: '0.35rem' }}>
+                    Payment Mode
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('Cash on Delivery')}
+                      style={{
+                        padding: '0.5rem',
+                        fontSize: '0.78rem',
+                        fontWeight: paymentMethod === 'Cash on Delivery' ? 700 : 500,
+                        background: paymentMethod === 'Cash on Delivery' ? 'var(--primary-50)' : '#ffffff',
+                        border: paymentMethod === 'Cash on Delivery' ? '1.5px solid var(--primary)' : '1px solid var(--slate-200)',
+                        color: paymentMethod === 'Cash on Delivery' ? 'var(--primary)' : 'var(--slate-700)',
+                        borderRadius: 'var(--radius-xs)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      💵 Cash on Delivery
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('UPI on Delivery')}
+                      style={{
+                        padding: '0.5rem',
+                        fontSize: '0.78rem',
+                        fontWeight: paymentMethod === 'UPI on Delivery' ? 700 : 500,
+                        background: paymentMethod === 'UPI on Delivery' ? 'var(--primary-50)' : '#ffffff',
+                        border: paymentMethod === 'UPI on Delivery' ? '1.5px solid var(--primary)' : '1px solid var(--slate-200)',
+                        color: paymentMethod === 'UPI on Delivery' ? 'var(--primary)' : 'var(--slate-700)',
+                        borderRadius: 'var(--radius-xs)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      📲 UPI on Handover
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: 'var(--slate-500)', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: 'var(--slate-500)', marginTop: '0.6rem' }}>
                 <ShieldCheck size={16} color="var(--emerald-600)" />
-                <span>Pay on Delivery (Cash / UPI on handover). No advance payment needed.</span>
+                <span>Zero advance fee. Pay only after inspecting delivered items.</span>
               </div>
               
               {hasPharmacyItems && (
@@ -206,10 +423,11 @@ export const CartDrawer = () => {
 
               <button 
                 className="btn-primary" 
-                style={{ width: '100%', padding: '0.85rem' }}
+                style={{ width: '100%', padding: '0.85rem', justifyContent: 'center' }}
                 onClick={handlePlaceOrder}
+                disabled={isSubmitting}
               >
-                <span>Confirm Order (Cash on Delivery)</span>
+                <span>{isSubmitting ? 'Placing Order...' : `Confirm Order (${paymentMethod})`}</span>
                 <ArrowRight size={18} />
               </button>
             </div>

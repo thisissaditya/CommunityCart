@@ -150,3 +150,89 @@ export const createProductApi = async (productData) => {
     return { success: false, message: err.message };
   }
 };
+
+export const bulkImportProductsApi = async (products) => {
+  try {
+    const res = await fetch(`${API_BASE}/stores/products/bulk`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ products }),
+    });
+    return await res.json();
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+};
+
+export const toggleProductStockApi = async (id) => {
+  try {
+    const res = await fetch(`${API_BASE}/stores/products/${id}/toggle-stock`, {
+      method: 'PATCH',
+    });
+    return await res.json();
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+};
+
+export const createOrderApi = async (orderData) => {
+  try {
+    const res = await fetch(`${API_BASE}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData),
+    });
+    return await res.json();
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+};
+
+export const fetchUserOrdersApi = async (email) => {
+  try {
+    const res = await fetch(`${API_BASE}/orders/user/${encodeURIComponent(email)}`);
+    if (!res.ok) throw new Error('Failed to fetch user orders');
+    const data = await res.json();
+    return (data.orders || []).map(o => ({ ...o, id: o._id || o.id }));
+  } catch (err) {
+    console.warn('Backend API fallback for user orders:', err);
+    return [];
+  }
+};
+
+export const fetchVendorOrdersApi = async (storeName = 'all') => {
+  try {
+    const res = await fetch(`${API_BASE}/orders/vendor/${encodeURIComponent(storeName)}`);
+    if (!res.ok) throw new Error('Failed to fetch vendor orders');
+    const data = await res.json();
+    return (data.orders || []).map(o => ({ ...o, id: o._id || o.id }));
+  } catch (err) {
+    console.warn('Backend API fallback for vendor orders:', err);
+    return [];
+  }
+};
+
+export const fetchAllOrdersApi = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/orders`);
+    if (!res.ok) throw new Error('Failed to fetch all orders');
+    const data = await res.json();
+    return (data.orders || []).map(o => ({ ...o, id: o._id || o.id }));
+  } catch (err) {
+    console.warn('Backend API fallback for all orders:', err);
+    return [];
+  }
+};
+
+export const updateOrderStatusApi = async (id, status, note = '', riderName = 'Raju') => {
+  try {
+    const res = await fetch(`${API_BASE}/orders/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, note, riderName }),
+    });
+    return await res.json();
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+};

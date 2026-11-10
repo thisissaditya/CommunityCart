@@ -3,12 +3,14 @@ import dotenv from 'dotenv';
 import User from '../models/User.js';
 import Store from '../models/Store.js';
 import Product from '../models/Product.js';
+import Order from '../models/Order.js';
 import Complaint from '../models/Complaint.js';
 import EmergencyContact from '../models/EmergencyContact.js';
 import CommunityEvent from '../models/CommunityEvent.js';
 import { 
   initialStores, 
   initialProducts, 
+  initialOrders,
   initialComplaints, 
   initialEmergencyContacts, 
   initialCommunityEvents 
@@ -33,6 +35,7 @@ const seedDatabase = async () => {
       User.deleteMany(),
       Store.deleteMany(),
       Product.deleteMany(),
+      Order.deleteMany(),
       Complaint.deleteMany(),
       EmergencyContact.deleteMany(),
       CommunityEvent.deleteMany()
@@ -46,6 +49,7 @@ const seedDatabase = async () => {
     await User.insertMany([
       { name: 'Aditya Rakesh', email: 'aditya@example.com', password: hashedPassword, role: 'citizen', phone: '9876543210' },
       { name: 'Ramesh Sharma', email: 'ramesh@sharmadhaba.com', password: hashedPassword, role: 'vendor', phone: '9871122334' },
+      { name: 'Aditya Raj', email: 'aditya.raj@apnadhaba.com', password: hashedPassword, role: 'vendor', phone: '9876511223' },
       { name: 'Mukhiya Ji', email: 'admin@rampurpanchayat.gov.in', password: hashedPassword, role: 'admin', phone: '9998887776' }
     ]);
     console.log('👤 Created demo users');
@@ -68,7 +72,17 @@ const seedDatabase = async () => {
     });
     await Product.insertMany(mappedProducts);
 
-    // Insert others without specific ID dependencies
+    // Insert Orders with mapped storeId
+    const mappedOrders = initialOrders.map(order => {
+      const { id, storeId, ...orderData } = order;
+      return {
+        ...orderData,
+        storeId: storeIdMap[storeId] || storeId
+      };
+    });
+    await Order.insertMany(mappedOrders);
+
+    // Insert complaints, contacts, events
     const complaintsWithoutId = initialComplaints.map(({ id, ...rest }) => rest);
     await Complaint.insertMany(complaintsWithoutId);
 
@@ -78,8 +92,7 @@ const seedDatabase = async () => {
     const eventsWithoutId = initialCommunityEvents.map(({ id, ...rest }) => rest);
     await CommunityEvent.insertMany(eventsWithoutId);
     
-    console.log('🌱 Seeded Stores, Products, Complaints, Emergency Contacts, and Events');
-
+    console.log('🌱 Seeded Stores, Products, Orders, Complaints, Emergency Contacts, and Events');
     console.log('🎉 Database seeding completed successfully!');
     process.exit();
   } catch (error) {

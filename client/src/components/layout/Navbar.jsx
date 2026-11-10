@@ -12,7 +12,8 @@ import {
   Calendar, 
   LayoutDashboard,
   LogOut,
-  Layers
+  Layers,
+  Truck
 } from 'lucide-react';
 
 const VILLAGES = [
@@ -144,6 +145,14 @@ export const Navbar = () => {
               >
                 <Store size={17} />
                 Marketplace
+              </button>
+
+              <button 
+                className={`nav-link-btn ${activeTab === 'orders' ? 'active' : ''}`}
+                onClick={() => setActiveTab('orders')}
+              >
+                <Truck size={17} />
+                My Orders
               </button>
 
               <button 

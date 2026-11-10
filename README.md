@@ -59,18 +59,33 @@ The platform merges two modern, battle-tested design paradigms:
 
 ---
 
-## 🚀 10% Foundation Milestone Deliverables
+## 🚀 Implemented Capabilities & Deliverables (Till Now Completion — 60%)
 
-- [x] **Project Repository & Monorepo Structure**: Complete workspace with `client/` and `server/`.
-- [x] **Custom CSS Design Tokens**: Saffron orange, verdant emerald, dark slate, and typography tokens.
-- [x] **Universal Navigation**: Sticky navbar with village selector, 24/7 SOS alert banner, and role pill.
-- [x] **Marketplace Discovery Hub**: Multi-category service tiles, verified vendor cards, and catalogue items.
-- [x] **Interactive Cart & Cash-on-Delivery Drawer**: Full bill breakdown, village delivery landmark input, and instant order placement.
-- [x] **Civic Grievance Desk**: Interactive submission modal with priority tags, status badges, and assigned officer tracking.
-- [x] **Community Outreach Hub**: Scheduled health camps, blood donation drives, and attendee registration.
-- [x] **Management Dashboard Prototype**: Dribbble-style bento cards, inventory stock toggle, and grievance resolution actions.
-- [x] **Multi-Role Authentication**: Seamless switching between Citizen, Shop Owner, and Panchayat Admin.
-- [x] **Resilient Express Backend**: Modular controllers, Mongoose schemas (`User`, `Store`, `Product`, `Complaint`, `EmergencyContact`), and automatic in-memory fallback.
+### 🏗️ Foundation & Core Architecture (Phase 1)
+- [x] **Project Repository & Monorepo Structure**: Complete workspace with clean modular `client/` and `server/` trees.
+- [x] **Custom CSS Design Tokens**: Saffron orange, verdant emerald, dark slate, modern typography tokens, and responsive layout primitives.
+- [x] **Universal Navigation**: Sticky navbar with multi-village selector, 24/7 emergency SOS banner, and live role switching pill.
+- [x] **Marketplace Discovery Hub**: Multi-category service tiles, verified vendor cards, and rich local product catalogues.
+- [x] **Interactive Cart & Cash-on-Delivery Drawer**: Full bill breakdown, village delivery landmark input, COD / UPI selection, and instant order placement.
+- [x] **Civic Grievance Desk**: Interactive submission modal with priority tags, status badges, and assigned panchayat officer tracking.
+- [x] **Community Outreach Hub**: Scheduled health camps, blood donation drives, farmer extension workshops, and attendee registration.
+- [x] **Management Dashboard**: Dribbble-style bento metric cards, inventory stock toggles, and grievance resolution workflows.
+- [x] **Multi-Role Authentication**: Seamless switching between Citizen, Shop Owner, and Panchayat Admin modes.
+- [x] **Resilient Express Backend**: Modular controllers, Mongoose schemas (`User`, `Store`, `Product`, `Order`, `Complaint`, `EmergencyContact`), and automatic zero-downtime in-memory fallback engine.
+
+### ☁️ Cloud, Media & Persistence (Phase 2)
+- [x] **MongoDB Atlas Cloud Synchronization**: Production cloud database cluster integration with automatic Mongoose ID mapping and automated cross-environment seeding (`npm run seed`).
+- [x] **Cloudinary Prescription Upload**: Secure file upload backend endpoints with `multer` & `multer-storage-cloudinary`, featuring an animated drag-and-drop UI with strict checkout prescription validation for pharmacy orders.
+- [x] **Live Cart Synchronization**: `LocalStorage` persistence layer in `AppContext.jsx` ensuring cart contents persist seamlessly across browser sessions and refreshes.
+
+### 🚚 Operations, Logistics & Dhaba Integration (Phase 3 — Current Milestone)
+- [x] **Authentic Indian Dhaba & Local Restaurant Dataset**: Complete, authentic regional menu records for *Sharma Ji Ka Mess & Dhaba* (pure desi ghee thalis & dal makhani), *Apna Dhaba & Tandoor Corner* (highway-style paneer butter masala & tandoori naans), *Chaudhary Sweets* (khasta samosas, hot desi ghee jalebis, chole bhature, kulhad chai), *Royal Rajputana Dhaba* (dal baati churma, missi roti), plus authentic Kirana staples and generic pharmacy supplies with realistic INR pricing and high-resolution food photography.
+- [x] **Full-Lifecycle Order Management & Tracking**: End-to-end Mongoose `Order` model, unique order numbers (`ORD-XXXXX`), payment modes, and the **"My Orders & Deliveries"** interface featuring an animated 5-step progress stepper:
+  $$\text{Order Placed} \longrightarrow \text{Accepted} \longrightarrow \text{Cooking / Packing} \longrightarrow \text{Out for Delivery} \longrightarrow \text{Delivered}$$
+- [x] **Interactive Order Progression Simulator**: Built-in helper on citizen order cards allowing evaluators to simulate real-time status transitions and watch the progress stepper and SMS gateway react live.
+- [x] **Vendor Active Orders Pipeline**: Dedicated operational pipeline in the Management Dashboard allowing shop owners to accept incoming orders, transition to food preparation, and assign riders for doorstep dispatch.
+- [x] **Vendor Inventory Bulk & Dhaba Quick-Import Utility**: One-click menu importer featuring 4 regional Indian culinary presets (*Dhaba Curries & Paneer*, *Tandoor Breads*, *Halwai Sweets & Chaat*, *Village Kirana*) alongside a CSV spreadsheet parser for rapid catalog updates.
+- [x] **Simulated Rural SMS Gateway**: Real-time SMS notification component (`SmsNotificationToast.jsx`) that emulates cellular alerts sent via BSNL/Jio rural networks upon order placement, rider dispatch, delivery completion, and civic grievance resolution.
 
 ---
 
@@ -78,9 +93,10 @@ The platform merges two modern, battle-tested design paradigms:
 
 | Layer | Technology |
 | :--- | :--- |
-| **Frontend** | React 18, Vite, Custom Modern CSS (No Tailwind dependency), Lucide Icons |
-| **Backend** | Node.js, Express.js |
-| **Database** | MongoDB / Mongoose (with automated fallback seed engine) |
+| **Frontend** | React 18, Vite, Custom Design System Tokens, Tailwind CSS v3, Framer Motion, Lucide Icons |
+| **Backend** | Node.js, Express.js, Multer, Cloudinary SDK |
+| **Database** | MongoDB Atlas / Mongoose (with dual-mode zero-downtime fallback seed engine) |
+| **Cloud Media** | Cloudinary (Medical Prescription storage & verification) |
 | **Authentication** | JWT (JSON Web Tokens) & Role-Based Access Control |
 | **Version Control** | Git & GitHub |
 
@@ -142,6 +158,6 @@ The platform includes built-in instant demo accounts for academic review:
 
 - [x] **Phase 1 (10%)**: Architectural skeleton, core design system, marketplace hub, civic complaints, emergency SOS, mock store, and initial repo push.
 - [x] **Phase 2 (30%)**: MongoDB Atlas cloud synchronization, Cloudinary prescription upload (aesthetic UI integration), live cart synchronization (LocalStorage persistence).
-- [ ] **Phase 3 (60%)**: Detailed order history, SMS notifications via rural gateway, vendor inventory bulk upload.
-- [ ] **Phase 4 (80%)**: Full Panchayat analytics, grievance photo uploads, attendance certificates for donation camps.
-- [ ] **Phase 5 (100%)**: Performance optimization for low-bandwidth 2G/3G networks, multi-language localization (Hindi/Regional), final defense presentation.
+- [x] **Phase 3 (60%)**: Detailed order history & tracking, authentic Indian Dhaba & local restaurant dataset, vendor active orders pipeline, vendor inventory bulk upload & dhaba presets, SMS notifications via simulated rural gateway.
+- [ ] **Phase 4 (80%)**: Full Panchayat analytics, grievance photo uploads, bilingual Hindi / Regional language support.
+- [ ] **Phase 5 (100%)**: Performance optimization for low-bandwidth 2G/3G networks, offline-first PWA sync, final defense presentation.

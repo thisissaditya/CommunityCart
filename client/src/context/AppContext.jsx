@@ -51,6 +51,23 @@ export const AppProvider = ({ children }) => {
     setTimeout(() => setToast(null), 3500);
   };
 
+  // Simulated Rural SMS Gateway state
+  const [smsAlert, setSmsAlert] = useState(null);
+
+  const triggerSmsAlert = (payload) => {
+    setSmsAlert({
+      phone: payload.phone || '+91 98765 43210',
+      message: payload.message || 'Notification dispatched.',
+      title: payload.title || 'Rural SMS Gateway',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    });
+    setTimeout(() => setSmsAlert(null), 6000);
+  };
+
+  // Order refresh trigger
+  const [orderRefreshKey, setOrderRefreshKey] = useState(0);
+  const refreshOrders = () => setOrderRefreshKey((k) => k + 1);
+
   const switchRole = (newRole) => {
     const updated = {
       ...currentUser,
@@ -145,6 +162,11 @@ export const AppProvider = ({ children }) => {
         setIsAuthModalOpen,
         toast,
         showToast,
+        smsAlert,
+        setSmsAlert,
+        triggerSmsAlert,
+        orderRefreshKey,
+        refreshOrders,
       }}
     >
       {children}

@@ -8,6 +8,8 @@ import { CartDrawer } from './components/marketplace/CartDrawer';
 import { ComplaintSection } from './components/complaints/ComplaintSection';
 import { EventsSection } from './components/events/EventsSection';
 import { ManagementDashboard } from './components/dashboard/ManagementDashboard';
+import { OrdersView } from './components/orders/OrdersView';
+import { SmsNotificationToast } from './components/common/SmsNotificationToast';
 import { EmergencyModal } from './components/emergency/EmergencyModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { Footer } from './components/layout/Footer';
@@ -96,7 +98,7 @@ const MainContent = () => {
                   className={`filter-pill ${selectedCategory === 'grocery' ? 'active' : ''}`}
                   onClick={() => setSelectedCategory('grocery')}
                 >
-                  <ShoppingBasket size={14} /> Aditya
+                  <ShoppingBasket size={14} /> Kirana & Groceries
                 </button>
                 <button
                   className={`filter-pill ${selectedCategory === 'pharmacy' ? 'active' : ''}`}
@@ -153,6 +155,9 @@ const MainContent = () => {
         {/* Civic Grievances View */}
         {activeTab === 'complaints' && <ComplaintSection />}
 
+        {/* My Orders & Delivery Tracking View */}
+        {activeTab === 'orders' && <OrdersView />}
+
         {/* Health Camps & Community Events View */}
         {activeTab === 'events' && <EventsSection />}
 
@@ -160,10 +165,11 @@ const MainContent = () => {
         {activeTab === 'dashboard' && <ManagementDashboard />}
       </div>
 
-      {/* Global Modals & Drawers */}
+      {/* Global Modals, Drawers & Simulated Rural SMS Alerts */}
       <CartDrawer />
       <EmergencyModal />
       <AuthModal />
+      <SmsNotificationToast />
 
       <Footer />
     </div>

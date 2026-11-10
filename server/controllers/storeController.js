@@ -153,3 +153,38 @@ export const toggleProductStock = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const bulkCreateProducts = async (req, res) => {
+  try {
+    const { products } = req.body;
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({ success: false, message: 'Please provide an array of products' });
+    }
+
+    if (getDBStatus()) {
+      const created = await Product.insertMany(products);
+      return res.status(201).json({ success: true, count: created.length, products: created });
+    }
+
+    const added = products.map((item, index) => ({
+      id: `prod-${Date.now()}-${index}`,
+      name: item.name,
+      storeId: item.storeId || 'store-1',
+      storeName: item.storeName || 'Sharma Ji Ka Mess & Dhaba',
+      category: item.category || 'food',
+      subcategory: item.subcategory || 'General',
+      price: Number(item.price) || 50,
+      originalPrice: item.originalPrice ? Number(item.originalPrice) : (Number(item.price) || 50) + 15,
+      unit: item.unit || '1 item',
+      description: item.description || 'Authentic local item',
+      image: item.image || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600&auto=format&fit=crop&q=80',
+      inStock: item.inStock !== false,
+      isVeg: item.isVeg !== false,
+    }));
+
+    productsCache.unshift(...added);
+    res.status(201).json({ success: true, count: added.length, products: added });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

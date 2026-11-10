@@ -9,6 +9,7 @@ import complaintRoutes from './routes/complaintRoutes.js';
 import emergencyRoutes from './routes/emergencyRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(express.json());
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/stores', storeRoutes);
+app.use('/api/orders', orderRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/emergency', emergencyRoutes);
 app.use('/api/events', eventRoutes);
