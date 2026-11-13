@@ -17,6 +17,35 @@ export const fetchStores = async (category = 'all', village = '') => {
   }
 };
 
+export const fetchSearchSuggestionsApi = async (query = '') => {
+  try {
+    const params = new URLSearchParams();
+    if (query) params.append('q', query);
+
+    const res = await fetch(`${API_BASE}/stores/search/suggestions?${params.toString()}`);
+    if (!res.ok) throw new Error('Network response not ok');
+    return await res.json();
+  } catch (err) {
+    console.warn('Backend API fallback for search suggestions:', err);
+    return {
+      success: true,
+      popularSearches: [
+        'Shudh Ghee Thali',
+        'Paneer Butter Masala',
+        'Dal Makhani',
+        'Khasta Samosa',
+        'Desi Ghee Jalebi',
+        'Chakki Atta',
+        'Paracetamol 650mg',
+        'Kulhad Chai',
+      ],
+      suggestions: [],
+      products: [],
+      stores: [],
+    };
+  }
+};
+
 export const fetchProducts = async (category = 'all', search = '') => {
   try {
     const params = new URLSearchParams();

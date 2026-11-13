@@ -3,6 +3,7 @@ import {
   getStores, 
   getStoreById, 
   getProducts, 
+  getSearchSuggestions,
   createProduct, 
   bulkCreateProducts, 
   toggleProductStock 
@@ -11,6 +12,7 @@ import {
 const router = express.Router();
 
 router.get('/', getStores);
+router.get('/search/suggestions', getSearchSuggestions);
 router.get('/products', getProducts);
 router.post('/products', createProduct);
 router.post('/products/bulk', bulkCreateProducts);

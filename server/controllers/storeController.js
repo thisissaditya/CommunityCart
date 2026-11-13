@@ -61,8 +61,14 @@ export const getProducts = async (req, res) => {
       const query = {};
       if (category && category !== 'all') query.category = category;
       if (storeId) query.storeId = storeId;
-      if (search) {
-        query.name = { $regex: search, $options: 'i' };
+      if (search && search.trim()) {
+        const s = search.trim();
+        query.$or = [
+          { name: { $regex: s, $options: 'i' } },
+          { description: { $regex: s, $options: 'i' } },
+          { subcategory: { $regex: s, $options: 'i' } },
+          { storeName: { $regex: s, $options: 'i' } },
+        ];
       }
       const products = await Product.find(query);
       return res.json({ success: true, count: products.length, products });
@@ -75,12 +81,120 @@ export const getProducts = async (req, res) => {
     if (storeId) {
       result = result.filter((p) => p.storeId === storeId);
     }
-    if (search) {
-      const q = search.toLowerCase();
-      result = result.filter((p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      result = result.filter((p) => 
+        p.name.toLowerCase().includes(q) || 
+        p.description?.toLowerCase().includes(q) ||
+        p.subcategory?.toLowerCase().includes(q) ||
+        p.storeName?.toLowerCase().includes(q)
+      );
     }
 
     res.json({ success: true, count: result.length, products: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getSearchSuggestions = async (req, res) => {
+  try {
+    const q = (req.query.q || '').trim().toLowerCase();
+    const popularSearches = [
+      'Shudh Ghee Thali',
+      'Paneer Butter Masala',
+      'Dal Makhani',
+      'Khasta Samosa',
+      'Desi Ghee Jalebi',
+      'Chakki Atta',
+      'Paracetamol 650mg',
+      'Kulhad Chai',
+      'Chole Bhature',
+      'Mustard Oil',
+      'Fresh Buffalo Milk',
+      'Dal Baati Churma',
+    ];
+
+    if (!q) {
+      return res.json({
+        success: true,
+        popularSearches,
+        suggestions: popularSearches.slice(0, 5),
+        products: [],
+        stores: [],
+      });
+    }
+
+    if (getDBStatus()) {
+      const productMatches = await Product.find({
+        $or: [
+          { name: { $regex: q, $options: 'i' } },
+          { subcategory: { $regex: q, $options: 'i' } },
+          { description: { $regex: q, $options: 'i' } },
+        ],
+      }).limit(5);
+
+      const storeMatches = await Store.find({
+        $or: [
+          { name: { $regex: q, $options: 'i' } },
+          { category: { $regex: q, $options: 'i' } },
+          { description: { $regex: q, $options: 'i' } },
+        ],
+      }).limit(3);
+
+      const suggestions = [
+        ...new Set([
+          ...productMatches.map((p) => p.name),
+          ...storeMatches.map((s) => s.name),
+          ...popularSearches.filter((term) => term.toLowerCase().includes(q)),
+        ]),
+      ].slice(0, 6);
+
+      return res.json({
+        success: true,
+        query: q,
+        popularSearches,
+        suggestions,
+        products: productMatches,
+        stores: storeMatches,
+      });
+    }
+
+    // In-memory fallback
+    const productMatches = productsCache
+      .filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.subcategory?.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q)
+      )
+      .slice(0, 5);
+
+    const storeMatches = storesCache
+      .filter(
+        (s) =>
+          s.name.toLowerCase().includes(q) ||
+          s.category?.toLowerCase().includes(q) ||
+          s.description?.toLowerCase().includes(q)
+      )
+      .slice(0, 3);
+
+    const suggestions = [
+      ...new Set([
+        ...productMatches.map((p) => p.name),
+        ...storeMatches.map((s) => s.name),
+        ...popularSearches.filter((term) => term.toLowerCase().includes(q)),
+      ]),
+    ].slice(0, 6);
+
+    res.json({
+      success: true,
+      query: q,
+      popularSearches,
+      suggestions,
+      products: productMatches,
+      stores: storeMatches,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

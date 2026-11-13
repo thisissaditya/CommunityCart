@@ -48,6 +48,11 @@
 - **Simulated Rural SMS Gateway**:
   - Developed `SmsNotificationToast.jsx` emulating SMS dispatch across Indian telecom networks (Jio / BSNL Rural Cell).
   - Automatically dispatches live alerts to citizens and shopkeepers upon order placement, rider dispatch, delivery completion, and civic grievance resolution.
+- **Panchayat Samadhan Desk (ग्राम समाधान मंच) & Expandable Ticket Cards**:
+  - Engineered `ExpandableTicketCard.jsx` powered by Framer Motion layout animations.
+  - Implemented compact summary view (Ticket ID, affected families, status pill, location) expanding on click to reveal full incident audits, 4-stage resolution pipeline, playable lineman voice notes, geotagged GPS proof photos, and direct officer calling hotlines.
+- **Smart Real-Time Search Recommendations**:
+  - Implemented `/api/stores/search/suggestions` backend endpoint and autocomplete suggestions dropdown with category quick-filters and trending search tags.
 
 ---
 

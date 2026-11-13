@@ -86,6 +86,10 @@ The platform merges two modern, battle-tested design paradigms:
 - [x] **Vendor Active Orders Pipeline**: Dedicated operational pipeline in the Management Dashboard allowing shop owners to accept incoming orders, transition to food preparation, and assign riders for doorstep dispatch.
 - [x] **Vendor Inventory Bulk & Dhaba Quick-Import Utility**: One-click menu importer featuring 4 regional Indian culinary presets (*Dhaba Curries & Paneer*, *Tandoor Breads*, *Halwai Sweets & Chaat*, *Village Kirana*) alongside a CSV spreadsheet parser for rapid catalog updates.
 - [x] **Simulated Rural SMS Gateway**: Real-time SMS notification component (`SmsNotificationToast.jsx`) that emulates cellular alerts sent via BSNL/Jio rural networks upon order placement, rider dispatch, delivery completion, and civic grievance resolution.
+- [x] **Panchayat Samadhan Desk (ग्राम समाधान मंच) & Expandable Ticket Cards**: Interactive civic grievance interface featuring Framer Motion `motion.div` layout animations with `ExpandableTicketCard.jsx`:
+  - **Compact View**: Ticket ID, category, status pill, title, affected families count, location, and date.
+  - **Animated Expanded View**: Incident Audit Report with urgency flags, 4-stage resolution pipeline audit (`Logged` ➔ `Review` ➔ `Inspection` ➔ `Completed`), field lineman voice notes with simulated playback bar, geotagged evidence images with GPS verification, and direct officer escalation hotlines.
+- [x] **Real-Time Backend Search Recommendations**: Integrated `/api/stores/search/suggestions` endpoint and debounced autocomplete search recommendations dropdown with instant 1-click select for dishes, groceries, and local dhabas.
 
 ---
 
